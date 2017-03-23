@@ -1,0 +1,28 @@
+name: 'app'
+
+type: 'java:8'
+
+hooks:
+    build: |
+        # Gradle needs to have the application plugin included so that it
+        # can build a fully self-contained and executable application.
+        # The daemon needs to be disabled so that it doesn't persist in the
+        # build environment.
+        ./gradlew installDist --no-daemon
+
+relationships:
+    database: 'mysqldb:mysql'
+
+web:
+    upstream:
+        socket_family: tcp
+        protocol: http
+    commands:
+        # Platform.sh environment variables need to be mapped into Java system properties
+        # manually.  This small Python script handles that.
+        start: "python platformsh.py"
+    locations:
+        /:
+            passthru: true
+
+disk: 512
